@@ -16,6 +16,8 @@ class MoviesController < ApplicationController
     @all_ratings = Movie.pluck(:rating).uniq.sort
     @checked = {}
 
+
+
     @all_ratings.each{|i| 
       if(@ratings == nil)
         @checked[i] = false
@@ -24,16 +26,30 @@ class MoviesController < ApplicationController
       end
     }
 
+    
 
     if @ratings
+      session[:ratings] = @ratings
+      @movies = Movie.where(rating: @ratings.keys)
+    elsif session.has_key?(:ratings)
+      @ratings = session[:ratings]
       @movies = Movie.where(rating: @ratings.keys)
     else
       @movies = Movie.all
     end
 
     if @sort 
-      @movies = Movie.all.order(@sort)
+      session[:sort] = @sort
+      @movies = @movies.all.order(@sort.to_s)
+    elsif session.has_key?(:sort)
+      @sort = session[:sort]
+      @movies = @movies.all.order(@sort.to_s)
     end
+
+
+    # if @sort != session[:sort] or @ratings != session[:ratings]
+    #   redirect_to movies_path(:sort => @sort, :ratings => @ratings)
+    # end
   end
 
   def new
